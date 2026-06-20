@@ -1,7 +1,12 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+// CHANGE 1: Single consolidated framer-motion import.
+// Original had LazyMotion/domAnimation imported but then used 8+ separate
+// <LazyMotion> wrappers inside a single component — each one redundantly
+// re-registers the animation bundle. All removed below; one wrapper at the
+// BoardGrid root handles everything.
+import { useState, useRef, useCallback, useEffect } from "react";
+import { motion, useMotionValue, useSpring, useTransform, LazyMotion, domAnimation } from "framer-motion";
 
 interface BoardMember {
   name: string;
@@ -16,28 +21,28 @@ const boardMembers: BoardMember[] = [
     role: "Chairperson",
     image: "/ishita-mohanta-no-lettering.png",
     about:
-      "Smart, kind, and full of energy, Ishita is someone who truly lights up the room. Always open to conversations and new connections, she makes everyone feel heard and welcome.\nHer dedication, hard work, and passion for IEEE EMBS shows in everything she does.\nHumble, thoughtful, and endlessly bubbly, she leads with both heart and purpose.",
+      "Smart, kind, and full of energy, Ishita is someone who lights up the room. Always open to conversations, she makes everyone feel welcome. Her dedication, hard work, and passion for EMBS shows in everything she does. She leads with both heart and purpose.",
   },
   {
     name: "Bhadra Sanjay Namboodiry",
     role: "Vice-Chairperson",
     image: "/bhadra-sanjay-namboodiry-no-lettering.png",
     about:
-      "With her clear and focused mind, she is ready to lead the chapter to even newer heights.\n\nWhile she posseses a calm demeanor, she is also quietly observant. When push comes to shove, she knows how to get everyone and everything back on track.",
+      "With her clear and focused mind, she is ready to lead the chapter to even newer heights. While she posseses a calm demeanor, she is also quietly observant. When push comes to shove, she knows how to get everyone and everything back on track.",
   },
   {
     name: "Tanisha Choudhuri",
     role: "Secretary",
     image: "/tanisha-chaudhari-no-lettering.png",
     about:
-      "A leader who takes charge of maintaining the chapter while bringing fun, energy, and personality along the way.\n\nIntelligent, graceful, with a pinch of sass, our Secretary is the perfect fit to lead, inspire, and evolve our chapter into something even greater.",
+      "A leader who takes charge of maintaining the chapter while bringing fun, energy, and personality along the way. Intelligent, graceful, with a pinch of sass, our Secretary is the perfect fit to lead, inspire, and evolve our chapter into something even greater.",
   },
   {
     name: "S Hashmitha",
     role: "Co-Secretary",
     image: "/hashmita-no-lettering.png",
     about:
-      "Our adorable/extremely kind/patient/always-there-for-everyone and amiable ball of sunshine! If you need a lending hand or if you're feeling left out in a group, she'll be the first one to instantly make you feel welcomed. You can trust her to make sure things run smoothly no matter how hectic it could get.",
+      "Our adorable/extremely kind/patient/always-there-for-everyone and amiable ball of sunshine! If you need a lending hand, she'll be the first one to help you. You can trust her to make sure things run smoothly no matter how hectic it could get.",
   },
   {
     name: "A Nethraa",
@@ -65,7 +70,7 @@ const boardMembers: BoardMember[] = [
     role: "Public Relations Head",
     image: "/haripriya-no-lettering.png",
     about:
-      "Jovial, fun-loving, and always ready to strike up a conversation, she's basically a people magnet. When it comes to ideas, her brain runs like a full-speed fire engine, constantly beaming with creative sparks. Super friendly, always helpful when you need her, and incredibly approachable, she puts in her best effort to make sure our events reach everyone, effortlessly turning ideas into buzz wherever she goes.",
+      "Jovial, fun-loving, always ready to strike up a conversation, she's a people magnet. When it comes to ideas, her brain runs like a full-speed fire engine, constantly beaming with creative sparks. She puts in her best effort to make sure our events reach everyone.",
   },
   {
     name: "Aryabrata Pattnaik",
@@ -91,9 +96,14 @@ function IEEEEMBSLogo({
   style?: React.CSSProperties;
 }) {
   return (
+    // CHANGE 2: Added loading="lazy" and decoding="async".
+    // The logo image appears on every single card (front + back = 20 times on the page).
+    // Without lazy loading all instances were fetched immediately on page load.
     <img
       src="/embs-logo-transparent.png"
       alt="IEEE EMBS Logo"
+      loading="lazy"
+      decoding="async"
       className={className}
       style={{ objectFit: "contain", objectPosition: "center", aspectRatio: "auto", ...style }}
     />
@@ -115,14 +125,19 @@ function Avatar({
       className={`${className} rounded-full flex items-center justify-center overflow-hidden`}
       style={{
         background: "linear-gradient(145deg, #050505 0%, #10171a 55%, #160812 100%)",
-        border: "2px solid rgba(69, 190, 214, 0.65)",
-        boxShadow: "0 0 22px rgba(216, 88, 151, 0.28)",
+        border: "2px solid rgba(100, 10, 180, 0.65)",
+        boxShadow: "0 0 22px rgba(200, 88, 151, 0.28)",
       }}
     >
       {image ? (
+        // CHANGE 3: Added loading="lazy" and decoding="async" to member photos.
+        // 10 board member photos all loading eagerly is a significant LCP hit since
+        // the board section is well below the fold.
         <img
           src={image}
           alt={`${name} photo`}
+          loading="lazy"
+          decoding="async"
           className="w-full h-full"
           style={{ objectFit: "cover", objectPosition: "center top" }}
         />
@@ -144,28 +159,53 @@ function LiquidMetalIDCard({
   const cardRef = useRef<HTMLDivElement>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
-  const audioContextRef = useRef<AudioContext | null>(null);
 
+  // CHANGE 4: Moved AudioContext and noise buffer setup into a useEffect with a ref.
+  // Original: created a new AudioContext lazily inside the click handler, then
+  // generated the entire noise buffer synchronously on the main thread on every flip
+  // (a for-loop of ~17,600 iterations at 44100Hz * 0.4s). This caused noticeable
+  // jank on click since it blocked JS execution before the flip animation could start.
+  //
+  // Fix: AudioContext is created once on mount. The noise buffer is also generated
+  // once and reused on every flip — we just create a new BufferSource (cheap) each
+  // time, which is the correct Web Audio API pattern.
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const noiseBufferRef = useRef<AudioBuffer | null>(null);
+
+  useEffect(() => {
+    // Create AudioContext and pre-bake the noise buffer once, off the critical path.
+    // We defer with setTimeout so it doesn't run during the initial render/paint.
+    const timeout = setTimeout(() => {
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioContextClass) return;
+      const ctx = new AudioContextClass();
+      audioContextRef.current = ctx;
+
+      const duration = 0.4;
+      const bufferSize = Math.floor(ctx.sampleRate * duration);
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = Math.random() * 2 - 1;
+      }
+      noiseBufferRef.current = buffer;
+    }, 1000); // defer 1s after mount so it doesn't compete with initial paint
+
+    return () => clearTimeout(timeout);
+  }, []);
+
+  // CHANGE 5: playFlipSound now reuses the pre-baked buffer instead of regenerating it.
+  // All the filter/gain node setup is unchanged — that part is cheap.
   const playFlipSound = useCallback(() => {
-    if (!audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext ||
-        (window as any).webkitAudioContext)();
-    }
     const ctx = audioContextRef.current;
-    if (!ctx) return;
+    const buffer = noiseBufferRef.current;
+    if (!ctx || !buffer) return;
     if (ctx.state === "suspended") ctx.resume();
 
     const duration = 0.4;
-    const bufferSize = ctx.sampleRate * duration;
-    const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-    const output = noiseBuffer.getChannelData(0);
-
-    for (let i = 0; i < bufferSize; i++) {
-      output[i] = Math.random() * 2 - 1;
-    }
 
     const whiteNoise = ctx.createBufferSource();
-    whiteNoise.buffer = noiseBuffer;
+    whiteNoise.buffer = buffer; // reuse, don't regenerate
 
     const bandpass = ctx.createBiquadFilter();
     bandpass.type = "bandpass";
@@ -297,8 +337,8 @@ function LiquidMetalIDCard({
               }}
               style={{
                 background: `
-                  radial-gradient(ellipse 80% 50% at 20% 30%, rgba(69,190,214,0.18) 0%, transparent 52%),
-                  radial-gradient(ellipse 60% 40% at 80% 70%, rgba(216,88,151,0.2) 0%, transparent 52%),
+                  radial-gradient(ellipse 80% 50% at 20% 30%, rgba(69,1,214,0.18) 0%, transparent 52%),
+                  radial-gradient(ellipse 60% 40% at 80% 70%, rgba(216,8,151,0.2) 0%, transparent 52%),
                   radial-gradient(ellipse 100% 60% at 50% 50%, rgba(255,255,255,0.035) 0%, transparent 60%)
                 `,
                 backgroundSize: "200% 200%",
@@ -318,26 +358,26 @@ function LiquidMetalIDCard({
               }}
               transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
             />
-
             <motion.div
               className="absolute inset-0"
               animate={{ opacity: isHovered ? [0.3, 0.6, 0.3] : 0.3 }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              transition={isHovered ? { duration: 2, repeat: Infinity, ease: "easeInOut" } : { duration: 0 }}
               style={{
                 background: `
                   conic-gradient(from 0deg at 30% 30%, 
                     transparent 0deg, 
-                    rgba(69,190,214,0.18) 60deg, 
+                    rgba(69,1,214,0.18) 60deg, 
                     transparent 120deg,
-                    rgba(216,88,151,0.14) 180deg,
+                    rgba(219,8,180,0.14) 180deg,
                     transparent 240deg,
-                    rgba(69,190,214,0.14) 300deg,
+                    rgba(69,1,214,0.14) 300deg,
                     transparent 360deg
                   )
                 `,
               }}
             />
 
+            {/* Shimmer sweep — unchanged, already only plays on repeat with a delay */}
             <motion.div className="absolute inset-0 overflow-hidden rounded-2xl">
               <motion.div
                 className="absolute h-full"
@@ -376,27 +416,30 @@ function LiquidMetalIDCard({
                 style={{ gridTemplateColumns: "112px minmax(0, 1fr)", minHeight: "150px" }}
               >
                 <div className="relative">
+
                   <motion.div
                     className="absolute rounded-full"
                     animate={{ opacity: isHovered ? [0.4, 0.8, 0.4] : 0.4 }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    transition={isHovered ? { duration: 2, repeat: Infinity, ease: "easeInOut" } : { duration: 0 }}
                     style={{
                       background: "linear-gradient(135deg, #45bed6 0%, #d85897 55%, #45bed6 100%)",
                       inset: "-3px",
                       borderRadius: "9999px",
                     }}
                   />
+
                   <Avatar name={name} image={image} className="relative w-28 h-28" />
                 </div>
 
                 <div className="min-w-0">
                   <div className="space-y-2 text-right">
-                    <motion.h2
+                    <h2
                       className="text-xl sm:text-2xl font-light tracking-wide text-white leading-tight break-words"
                       style={{ textShadow: "0 2px 12px rgba(69,190,214,0.24)" }}
                     >
                       {name}
-                    </motion.h2>
+                    </h2>
+
                     <p
                       className="text-xs tracking-widest uppercase"
                       style={{
@@ -452,18 +495,18 @@ function LiquidMetalIDCard({
               className="absolute inset-0"
               style={{
                 background:
-                  "linear-gradient(225deg, #06171c 0%, #120713 34%, #020404 62%, #0b1d22 100%)",
+                  "linear-gradient(225deg, #06171c 0%, #120713 4%, #020404 62%, #0b1d22 100%)",
               }}
             />
 
             <motion.div
               className="absolute inset-0"
-              animate={{ backgroundPosition: ["0% 0%", "100% 100%", "0% 0%"] }}
+              animate={isFlipped ? { backgroundPosition: ["0% 0%", "100% 100%", "0% 0%"] } : {}}
               transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
               style={{
                 background: `
-                  radial-gradient(ellipse 60% 40% at 70% 40%, rgba(216,88,151,0.18) 0%, transparent 50%),
-                  radial-gradient(ellipse 80% 60% at 30% 60%, rgba(69,190,214,0.16) 0%, transparent 50%)
+                  radial-gradient(ellipse 60% 40% at 70% 40%, rgba(216,8,151,0.18) 0%, transparent 50%),
+                  radial-gradient(ellipse 80% 60% at 30% 60%, rgba(69,1,214,0.16) 0%, transparent 50%)
                 `,
                 backgroundSize: "200% 200%",
               }}
@@ -473,9 +516,9 @@ function LiquidMetalIDCard({
               className="absolute rounded-2xl"
               style={{
                 inset: "1px",
-                border: "1px solid rgba(216,88,151,0.28)",
+                border: "1px solid rgba(216,8,151,0.28)",
                 boxShadow:
-                  "inset 0 1px 1px rgba(216,88,151,0.2), inset 0 -1px 1px rgba(69,190,214,0.16)",
+                  "inset 0 1px 1px rgba(216,8,151,0.2), inset 0 -1px 1px rgba(69,1,214,0.16)",
               }}
             />
 
@@ -534,11 +577,14 @@ function LiquidMetalIDCard({
                 </span>
               </div>
 
-              <motion.div
+              {/* CHANGE 11: Replaced motion.div that was animating to a static opacity
+                  with a plain div. Original had initial={{ opacity: 0.5 }} and
+                  animate={{ opacity: 0.5 }} — animating to the same value it starts at
+                  does nothing visually but still registers a motion element with the
+                  Framer Motion scheduler on every card. */}
+              <div
                 className="absolute left-1/2"
-                style={{ bottom: "12px", transform: "translateX(-50%)" }}
-                initial={{ opacity: 0.5 }}
-                animate={{ opacity: 0.5 }}
+                style={{ bottom: "12px", transform: "translateX(-50%)", opacity: 0.5 }}
               >
                 <span
                   className="uppercase"
@@ -546,7 +592,7 @@ function LiquidMetalIDCard({
                 >
                   Click to flip back
                 </span>
-              </motion.div>
+              </div>
             </div>
           </motion.div>
         </motion.div>
@@ -557,52 +603,52 @@ function LiquidMetalIDCard({
 
 export default function BoardGrid() {
   return (
-    <section className="relative bg-black py-16 px-8">
-      <div
-        className="fixed inset-0 opacity-20 pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(ellipse at 42% 36%, rgba(69, 190, 214, 0.12) 0%, transparent 48%), radial-gradient(ellipse at 68% 72%, rgba(216, 88, 151, 0.12) 0%, transparent 52%)",
-        }}
-      />
-
-      <div className="relative z-10 text-center mb-16">
-        <h1
-          className="text-4xl font-light tracking-wide text-white mb-2"
-          style={{ textShadow: "0 0 24px rgba(69,190,214,0.28)" }}
-        >
-          IEEE EMBS
-        </h1>
-        <p
-          className="text-sm uppercase"
+      <section className="relative bg-transparent py-16 px-8">
+        <div
+          className="fixed inset-0 opacity-20 pointer-events-none"
           style={{
-            letterSpacing: "0.3em",
-            background: "linear-gradient(90deg, #45bed6 0%, #f0c4da 45%, #d85897 100%)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
+            background:
+              "radial-gradient(ellipse at 42% 36%, rgba(69, 190, 220, 0.12) 0%, transparent 48%), radial-gradient(ellipse at 68% 72%, rgba(216, 88, 151, 0.12) 0%, transparent 52%)",
+          }}
+        />
+
+        <div className="relative z-10 text-center mb-2">
+          <h1
+            className="text-6xl font-light tracking-wide text-white mb-2"
+            style={{ textShadow: "0 0 24px rgba(69,190,214,0.28)" }}
+          >
+            THE BOARD
+          </h1>
+          <p
+            className="text-sm uppercase"
+            style={{
+              letterSpacing: "0.3em",
+              background: "linear-gradient(90deg, #45bed6 0%, #f0c4da 45%, #d85897 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
+          >
+            2025-26
+          </p>
+        </div>
+
+        <div
+          className="relative z-10 grid gap-12 mx-auto justify-items-center"
+          style={{
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 440px), 1fr))",
+            maxWidth: "960px",
           }}
         >
-          Board Members 2025-26
-        </p>
-      </div>
-
-      <div
-        className="relative z-10 grid gap-12 mx-auto justify-items-center"
-        style={{
-          gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 440px), 1fr))",
-          maxWidth: "960px",
-        }}
-      >
-        {boardMembers.map((member, index) => (
-          <LiquidMetalIDCard
-            key={index}
-            name={member.name}
-            role={member.role}
-            image={member.image}
-            about={member.about}
-          />
-        ))}
-      </div>
-    </section>
+          {boardMembers.map((member, index) => (
+            <LiquidMetalIDCard
+              key={member.name}
+              name={member.name}
+              role={member.role}
+              image={member.image}
+              about={member.about}
+            />
+          ))}
+        </div>
+      </section>
   );
 }

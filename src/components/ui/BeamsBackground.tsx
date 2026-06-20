@@ -52,7 +52,7 @@ export default function BeamsBackground({
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const beamsRef = useRef<Beam[]>([])
   const animationFrameRef = useRef<number>(0)
-  const MINIMUM_BEAMS = 20
+  const MINIMUM_BEAMS = 12
 
   const opacityMap = { subtle: 0.7, medium: 0.85, strong: 1 }
 
@@ -106,7 +106,6 @@ export default function BeamsBackground({
     function animate() {
       if (!canvas || !ctx) return
       ctx.clearRect(0, 0, canvas.width, canvas.height)
-      ctx.filter = "blur(35px)"
       beamsRef.current.forEach((beam, index) => {
         beam.y -= beam.speed
         beam.pulse += beam.pulseSpeed
@@ -117,25 +116,23 @@ export default function BeamsBackground({
     }
 
     animate()
-    return () => {
-      window.removeEventListener("resize", updateCanvasSize)
-      cancelAnimationFrame(animationFrameRef.current)
+    let resizeTimeout: ReturnType<typeof setTimeout>
+    const debouncedResize = () => {
+      clearTimeout(resizeTimeout)
+      resizeTimeout = setTimeout(updateCanvasSize, 150)
     }
-  }, [intensity])
-
+    window.addEventListener("resize", debouncedResize)
+    return () => window.removeEventListener("resize", debouncedResize)
+    }
+    , [intensity])
+ 
   return (
     <div className={cn("relative min-h-screen w-full bg-neutral-950", className)}>
       {/* BACKGROUND LAYER: Canvas & Gradient Overlays */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         <canvas ref={canvasRef} className="absolute inset-0" style={{ filter: "blur(15px)" }} />
-        <motion.div
-          className="absolute inset-0 bg-neutral-950/20"
-          animate={{ opacity: [0.05, 0.15, 0.05] }}
-          transition={{ duration: 10, ease: "easeInOut", repeat: Number.POSITIVE_INFINITY }}
-          style={{ backdropFilter: "blur(50px)" }}
-        />
+        <div className="absolute inset-0 bg-neutral-950/10" />
       </div>
-
       {/* CONTENT LAYER: This is where your Hero, About, etc. will render */}
       <div className="relative z-10">
         {children}

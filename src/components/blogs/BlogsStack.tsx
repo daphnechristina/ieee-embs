@@ -15,7 +15,7 @@ interface Card {
     id: "1.biomedical-exoskeleton",
     title: "Biomedical Exoskeleton",
     author: "Tejaswini Borreddi",
-    desc: "Its the 21st century but how has disability and physical labour sector evolved? Introducing exoskeletons, the biomedical marvel re-inventing rehabilitation and manpower support. Dive into how biomedical exoskeletons are making waves of change in the work and health sector!",
+    desc: "Dive into how biomedical exoskeletons are making waves of change in the work and health sector!",
     link: "https://medium.com/ieee-embsdiaries/into-the-engineering-marvel-that-may-end-wheelchairs-cbe006ec1107",
     image: "/embs-blog-images/blog1.png",
   },
@@ -23,7 +23,7 @@ interface Card {
     id: "2.e-skin",
     title: "E-Skin",
     author: "Swanandi Punse",
-    desc: "As machines get smarter, so are biomedical implants! Learn how prosthetics are smarter with E-Skin, the secret sauce making prosthetics more human. Delve into how prosthetics are no longer just attachments but more like limbs!",
+    desc: "Delve into how prosthetics are no longer just attachments but more like limbs!",
     link: "https://medium.com/ieee-embsdiaries/e-skin-the-future-of-intelligent-prosthetics-423ed70a2b1d",
     image: "/embs-blog-images/blog2.png",
   },
@@ -31,7 +31,7 @@ interface Card {
     id: "3.neural-implants",
     title: "Neural Implants",
     author: "Krishna VP",
-    desc: "Wondered how humans and machines are coming closer? Welcome to neural implants! Find out about how signal processing and closed loop systems are used for rehabilitation via neural implants!",
+    desc: "Find out how signal processing and closed loop systems are used for rehabilitation via neural implants!",
     link: "https://medium.com/ieee-embsdiaries/when-implants-listen-and-respond-signal-processing-at-the-core-of-closed-loop-neurotechnology-aa29145ebe28",
     image: "/embs-blog-images/blog3.png",
   },
@@ -39,7 +39,7 @@ interface Card {
     id: "4.lifi-space",
     title: "Li-fi to Space Links",
     author: "Rachel Roshini",
-    desc: "The future of communication is bright - literally. Dive into the blog titled 'Shining a Light on Optical Wireless Communication'.",
+    desc: "Dive into the blog titled 'Shining a Light on Optical Wireless Communication'.",
     link: "https://medium.com/ieee-embsdiaries/li-fi-to-space-links-the-era-of-optical-communication-b486fb763d63",
     image: "/embs-blog-images/blog4.png",
   },
@@ -47,7 +47,7 @@ interface Card {
     id: "5.electromagnetic-configuration",
     title: "Electromagnetic Configuration: The Role of Reconfigurable Intelligent Surfaces",
     author: "Aryabrata Pattnaik",
-    desc: "Improvise, adapt, overcome. This is the ace up the sleeve for 6G communication technology. Behold Reconfigurable Intelligent Systems (RIS), the dynamic backbone that adapts to the needs of 6G networks on demand.",
+    desc: "Behold Reconfigurable Intelligent Systems (RIS), the dynamic backbone that adapts to the needs of 6G networks on demand.",
     link: "https://medium.com/ieee-embsdiaries/electromagnetic-configuration-on-demand-the-role-of-reconfigurable-intelligent-surfaces-38187009440d",
     image: "/embs-blog-images/blog5.png",
   },
@@ -63,7 +63,7 @@ interface Card {
     id: "7.between-code-and-cell",
     title: "Between Code and Cell: Reimagining the Future of Care",
     author: "Salma Mehwish",
-    desc: "The visionaries of the future who will take healthcare beyond imagination. This is the journey of biomedical engineering.",
+    desc: "The visionaries of the future who will take healthcare beyond imagination.",
     link: "https://medium.com/ieee-embsdiaries/between-code-and-cell-building-the-future-of-care-85a1e8d7b17a",
     image: "/embs-blog-images/blog7.png",
   },
@@ -224,19 +224,21 @@ function CardContent({ contentType }: { contentType: number }) {
   const data = blogs[contentType - 1]
 
   return (
-    <div className="p-10 bg-linear-to-br from-gray-950 to-gray-950 rounded-lg text-center">
+    <div className="p-10 bg-linear-to-br outline-purple-950 outline from-gray-950 to-gray-950 rounded-lg text-center">
       <div className="flex flex-row h-auto w-auto items-center justify-center rounded-lg">
         <div className="flex h-auto w-auto items-center justify-center rounded-lg">
           <img
             src={data.image}
             alt={data.title}
-            className="h-auto w-lvh rounded-3xl object-cover object-center"
+            className="h-xs w-xs rounded-3xl object-cover object-center"
+            loading="lazy"
+            decoding="async"
           />
         </div>
         <div className="flex flex-row items-center justify-between px-3 pb-2">
           <div className="flex min-w-0 flex-1 flex-col">
             <div className="flex flex-col items-center justify-center gap-1">
-              <span className="font-bold text-xl font-serif font-stretch-condensed text-amber-50">
+              <span className="font-bold text-xl font-sans font-stretch-condensed text-amber-50">
                 {data.title}
               </span>
               <span className="font-sans font-bold text-pink-300">by {data.author}</span>
@@ -328,7 +330,26 @@ export default function AnimatedCardStack() {
 
   return (
     <div className="flex w-auto flex-col items-center justify-center pt-2">
-      <div className="relative h-95 overflow-hidden sm:w-161">
+      <div className="relative z-10 text-center">
+          <h1
+            className="text-6xl font-light tracking-wide text-white mb-2"
+            style={{ textShadow: "0 0 24px rgba(69,190,214,0.28)" }}
+          >
+            BLOGS
+          </h1>
+          <p
+            className="text-sm uppercase"
+            style={{
+              letterSpacing: "0.3em",
+              background: "linear-gradient(90deg, #45bed6 0%, #f0c4da 45%, #d85897 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
+          >
+            Few of our insights
+          </p>
+        </div>
+      <div className="relative h-95 mt-3 overflow-hidden sm:w-161">
         <AnimatePresence initial={false}>
           {cards.slice(0, 3).map((card, index) => (
             <AnimatedCard key={card.id} card={card} index={index} isAnimating={isAnimating} />

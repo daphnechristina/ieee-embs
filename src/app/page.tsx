@@ -5,24 +5,18 @@ import EventsRolodex from "@/components/events/EventsRolodex";
 import BlogsStack from "@/components/blogs/BlogsStack";
 import BoardGrid from "@/components/board/BoardGrid";
 import Footer from "@/components/contact-us/Footer";
+import IntroAnimation from "@/components/ui/IntroAnimation";
 
 export default function Home() {
   return (
-    <main className="relative min-h-screen bg-black w-full overflow-x-hidden">
-      
-      {/* 1. THE BACKGROUND LAYER */}
-      {/* This stays fixed while the page scrolls */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
+    <main className="relative min-h-screen bg-transparent w-full overflow-x-hidden">
+      <IntroAnimation />
+      <div className="fixed inset-0 z-0 ...">
         <BeamsBackground />
       </div>
-
-      {/* 2. THE CONTENT LAYER */}
-      {/* This sits on top (z-10) and scrolls normally */}
-      <div className="relative z-10 w-full">
-        
-        {/* Squad: About-Us */}
         <Hero />
-        
+
+        {/* Squad: About Us */}
         <section id="about" className="py-20 container mx-auto px-4">
           <AboutSection />
         </section>
@@ -30,7 +24,25 @@ export default function Home() {
         {/* Squad: Events */}
         <section id="events" className="py-20">
           <div className="container mx-auto px-4">
-            <h2 className="text-4xl font-black text-white uppercase mb-12">Event Timeline</h2>
+          <div className="relative z-10 text-center">
+          <h1
+            className="text-6xl font-light tracking-wide text-white mb-2"
+            style={{ textShadow: "0 0 24px rgba(69,190,214,0.28)" }}
+          >
+            EVENT TIMELINE
+          </h1>
+          <p
+            className="text-sm uppercase"
+            style={{
+              letterSpacing: "0.3em",
+              background: "linear-gradient(90deg, #45bed6 0%, #f0c4da 45%, #d85897 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
+          >
+            A glimpse of our work
+          </p>
+        </div>
             <EventsRolodex />
           </div>
         </section>
@@ -38,7 +50,6 @@ export default function Home() {
         {/* Squad: Blogs */}
         <section id="blogs" className="py-20">
           <div className="container mx-auto px-4">
-            <h2 className="text-4xl font-black text-[#ffffff] uppercase mb-12">Blogs</h2>
             <BlogsStack />
           </div>
         </section>
@@ -46,15 +57,12 @@ export default function Home() {
         {/* Squad: Board */}
         <section id="board" className="py-20">
           <div className="container mx-auto px-4">
-            <h2 className="text-4xl font-black text-white uppercase mb-12">Board</h2>
             <BoardGrid />
           </div>
         </section>
 
         {/* Squad: UI (Footer) */}
         <Footer />
-        
-      </div>
-    </main>
+      </main>
   );
 }
