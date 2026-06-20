@@ -4,6 +4,7 @@ import AboutSection from "@/components/about-us/AboutSection";
 import EventsRolodex from "@/components/events/EventsRolodex";
 import BlogsStack from "@/components/blogs/BlogsStack";
 import BoardGrid from "@/components/board/BoardGrid";
+import EcgPeakGame from "@/components/game/EcgPeakGame";
 import Footer from "@/components/contact-us/Footer";
 import IntroAnimation from "@/components/ui/IntroAnimation";
 
@@ -58,6 +59,14 @@ export default function Home() {
         <section id="board" className="py-20">
           <div className="container mx-auto px-4">
             <BoardGrid />
+          </div>
+        </section>
+
+        {/* Squad: Game */}
+        <section id="game" className="py-20">
+          <div className="container mx-auto px-4">
+            <h2 className="text-4xl font-black text-white uppercase mb-12">ECG Rhythm Game</h2>
+            <EcgPeakGame />
           </div>
         </section>
 
