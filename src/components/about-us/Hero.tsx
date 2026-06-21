@@ -14,11 +14,11 @@ export default function Hero() {
         transition={{ duration: 0.8 }}
         className="flex-1 z-20 space-y-8"
       >
-        <div className="inline-flex items-center px-3 py-1 rounded-full border border-blue-500/30 bg-blue-500/10 backdrop-blur-md">
+        {/*<div className="inline-flex items-center px-3 py-1 rounded-full border border-blue-500/30 bg-blue-500/10 backdrop-blur-md">
           <span className="text-[10px] md:text-xs font-mono text-blue-300 uppercase tracking-widest">
             VIT Vellore
           </span>
-        </div>
+        </div>*/}
 
         <div className="space-y-2">
           <h1 className="text-7xl md:text-9xl font-black text-white tracking-tighter leading-none">
