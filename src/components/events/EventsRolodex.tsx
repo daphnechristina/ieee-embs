@@ -222,7 +222,7 @@ export default function EventsRolodex() {
                       isActive ? "text-pink-300" : "text-zinc-600"
                     }`}
                   >
-                    <div className="text-[15px] font-semibold font-sans uppercase">{event.date}</div>
+                    <div className="text-[13px] font-semibold font-sans uppercase">{event.date}</div>
                     <div className="text-[10px] font-sans font-semibold">{event.year}</div>
                   </div>
  

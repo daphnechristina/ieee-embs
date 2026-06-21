@@ -2,7 +2,7 @@
 "use client"
 //pink text-[#E6619A]
 //blue text-[#42A8C6]
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 
 interface Card {
@@ -224,13 +224,13 @@ function CardContent({ contentType }: { contentType: number }) {
   const data = blogs[contentType - 1]
 
   return (
-    <div className="p-10 bg-linear-to-br outline-purple-950 outline from-gray-950 to-gray-950 rounded-lg text-center">
-      <div className="flex flex-row h-auto w-auto items-center justify-center rounded-lg">
+    <div className="p-6 bg-linear-to-br outline-purple-950 outline from-gray-950 to-gray-950 rounded-lg text-center">
+      <div className="flex flex-row h-[260px] w-full items-center justify-center rounded-lg">
         <div className="flex h-auto w-auto items-center justify-center rounded-lg">
           <img
             src={data.image}
             alt={data.title}
-            className="h-xs w-xs rounded-3xl object-cover object-center"
+            className="h-[220px] w-[220px] flex-shrink-0 rounded-3xl object-cover object-center"
             loading="lazy"
             decoding="async"
           />
@@ -314,19 +314,44 @@ function AnimatedCard({
 export default function AnimatedCardStack() {
   const [cards, setCards] = useState(initialCards)
   const [isAnimating, setIsAnimating] = useState(false)
-  const [nextId, setNextId] = useState(4)
 
-  const handleAnimate = () => {
-    setIsAnimating(true)
+  const idCounter = useRef(4)
 
-    const nextContentType =
-  cards[2].contentType >= blogs.length
-    ? 1
-    : cards[2].contentType + 1
-    setCards([...cards.slice(1), { id: nextId, contentType: nextContentType }])
-    setNextId((prev) => prev + 1)
-    setIsAnimating(false)
-  }
+    const handleAnimate = () => {
+      setIsAnimating(true)
+
+      const nextContentType =
+    cards[2].contentType >= blogs.length
+      ? 1
+      : cards[2].contentType + 1
+      const nextCardId = idCounter.current
+      setCards([...cards.slice(1), { id: nextCardId, contentType: nextContentType }])
+      idCounter.current += 1
+      setIsAnimating(false)
+    }
+
+    const handleAnimateBack = () => {
+      if (isAnimating) return; // Prevent spam clicking
+      setIsAnimating(true);
+
+      // 1. Calculate the previous content type
+      const prevContentType = cards[0].contentType <= 1 
+        ? blogs.length 
+        : cards[0].contentType - 1;
+
+      // 2. Generate a unique ID
+      const nextCardId = idCounter.current;
+      idCounter.current += 1;
+
+      // 3. LOGIC FIX: Add to the START, remove from the END
+      setCards([
+        { id: nextCardId, contentType: prevContentType }, // New card at the top/start
+        ...cards.slice(0, cards.length - 1)                // Keep all but the last card
+      ]);
+
+      // 4. IMPORTANT: Wait for animation to finish before allowing next click
+      setTimeout(() => setIsAnimating(false), 100); 
+    };
 
   return (
     <div className="flex w-auto flex-col items-center justify-center pt-2">
@@ -357,10 +382,16 @@ export default function AnimatedCardStack() {
         </AnimatePresence>
       </div>
 
-      <div className="relative z-10 bg-transparent flex w-full items-center justify-center py-4">
+      <div className="relative z-10 bg-transparent gap-x-4 flex w-full items-center justify-center py-4">
+        <button
+          onClick={handleAnimateBack}
+          className="flex h-9 cursor-pointer items-center justify-center gap-1 overflow-hidden rounded-lg bg-black px-3 font-bold  text-secondary-foreground transition-all hover:bg-cyan-900 active:scale-[0.98]"
+        >
+          Back
+        </button>
         <button
           onClick={handleAnimate}
-          className="flex h-9 cursor-pointer items-center justify-center gap-1 overflow-hidden rounded-lg bg-black px-3 font-bold  text-secondary-foreground transition-all hover:bg-gray-900 active:scale-[0.98]"
+          className="flex h-9 cursor-pointer items-center justify-center gap-1 overflow-hidden rounded-lg bg-black px-3 font-bold  text-secondary-foreground transition-all hover:bg-pink-900 active:scale-[0.98]"
         >
           Next
         </button>

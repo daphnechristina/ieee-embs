@@ -16,6 +16,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "IEEE EMBS - VIT",
   description: "IEEE Engineering in Medicine and Biology Soceity",
+  icons: '/embs-logo-transparent.png'
 };
 
 export default function RootLayout({
