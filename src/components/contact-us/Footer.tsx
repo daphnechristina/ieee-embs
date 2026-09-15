@@ -2,9 +2,9 @@ import { Mail } from "lucide-react";
 
 export default function Footer() {
   return (
-    <div className="w-full px-6 py-16">
+    <div className="w-screen h-max overflow-x-hidden  px-6 py-16">
 
-      <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-[32px] p-10 shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
+      <div className="bg-black h-11/12 backdrop-blur-xl border border-white/10 p-10 shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8 text-white">
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
-import { motion, useMotionValue, useSpring, useTransform, LazyMotion, domAnimation } from "framer-motion";
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 
 interface BoardMember {
   name: string;
@@ -103,63 +103,16 @@ const boardMembers: BoardMember[] = [
     about:
       "Soft-spoken, sharp-minded... and suddenly very loud about F1.\nSweet, smart, and a perfectionist at heart.\nBrains, beauty, and speed talk combined.",
   },
+  {
+    name: "Dr. Debashis Maji",
+    role: "Faculty Coordinator",
+    image: "/debashis-maji.png",
+    insta: "",
+    linkedin: "https://www.linkedin.com/in/debashismaji/",
+    about:
+      "Dedicated to fostering innovation and excellence in biomedical engineering. His expertise and leadership contribute significantly to our academic and research initiatives.",
+  },
 ];
-
-function IEEEEMBSLogo({
-  className,
-  style,
-}: {
-  className?: string;
-  style?: React.CSSProperties;
-}) {
-  return (
-    <img
-      src="/embs-logo-transparent.png"
-      alt="IEEE EMBS Logo"
-      loading="lazy"
-      decoding="async"
-      className={className}
-      style={{ objectFit: "contain", objectPosition: "center", aspectRatio: "auto", ...style }}
-    />
-  );
-}
-
-function Avatar({
-  name,
-  image,
-  className,
-}: {
-  name: string;
-  image?: string;
-  className?: string;
-}) {
-  const initials = name.split(" ").map((n) => n[0]).join("");
-  return (
-    <div
-      className={`${className} rounded-full flex items-center justify-center overflow-hidden`}
-      style={{
-        background: "linear-gradient(145deg, #050505 0%, #10171a 55%, #160812 100%)",
-        border: "2px solid rgba(100, 10, 180, 0.65)",
-        boxShadow: "0 0 22px rgba(200, 88, 151, 0.28)",
-      }}
-    >
-      {image ? (
-        <img
-          src={image}
-          alt={`${name} photo`}
-          loading="lazy"
-          decoding="async"
-          className="w-full h-full"
-          style={{ objectFit: "cover", objectPosition: "center top" }}
-        />
-      ) : (
-        <span className="font-mono text-sm" style={{ color: "#45bed6" }}>
-          {initials}
-        </span>
-      )}
-    </div>
-  );
-}
 
 function LiquidMetalIDCard({
   name = "Name",
@@ -177,8 +130,6 @@ function LiquidMetalIDCard({
   const noiseBufferRef = useRef<AudioBuffer | null>(null);
 
   useEffect(() => {
-    // Create AudioContext and pre-bake the noise buffer once, off the critical path.
-    // We defer with setTimeout so it doesn't run during the initial render/paint.
     const timeout = setTimeout(() => {
       const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
       if (!AudioContextClass) return;
@@ -193,12 +144,11 @@ function LiquidMetalIDCard({
         data[i] = Math.random() * 2 - 1;
       }
       noiseBufferRef.current = buffer;
-    }, 1000); // defer 1s after mount so it doesn't compete with initial paint
+    }, 1000);
 
     return () => clearTimeout(timeout);
   }, []);
 
- 
   const playFlipSound = useCallback(() => {
     const ctx = audioContextRef.current;
     const buffer = noiseBufferRef.current;
@@ -208,7 +158,7 @@ function LiquidMetalIDCard({
     const duration = 0.4;
 
     const whiteNoise = ctx.createBufferSource();
-    whiteNoise.buffer = buffer; // reuse, don't regenerate
+    whiteNoise.buffer = buffer;
 
     const bandpass = ctx.createBiquadFilter();
     bandpass.type = "bandpass";
@@ -241,13 +191,13 @@ function LiquidMetalIDCard({
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
-  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [12, -12]), {
-    stiffness: 200,
-    damping: 25,
+  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [8, -8]), {
+    stiffness: 180,
+    damping: 22,
   });
-  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-12, 12]), {
-    stiffness: 200,
-    damping: 25,
+  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-8, 8]), {
+    stiffness: 180,
+    damping: 22,
   });
 
   const handleMouseMove = useCallback(
@@ -297,11 +247,11 @@ function LiquidMetalIDCard({
           className="absolute inset-0"
           animate={{
             rotateY: isFlipped ? 180 : 0,
-            scale: isFlipped ? [1, 1.05, 1] : 1,
+            scale: isFlipped ? [1, 1.03, 1] : 1,
           }}
           transition={{
-            rotateY: { duration: 0.8, ease: [0.4, 0, 0.2, 1] },
-            scale: { duration: 0.8, ease: [0.4, 0, 0.2, 1], times: [0, 0.5, 1] },
+            rotateY: { duration: 0.7, ease: [0.4, 0, 0.2, 1] },
+            scale: { duration: 0.7, ease: [0.4, 0, 0.2, 1], times: [0, 0.5, 1] },
           }}
           style={{
             transformStyle: "preserve-3d",
@@ -311,294 +261,127 @@ function LiquidMetalIDCard({
         >
           {/* FRONT */}
           <motion.div
-            className="absolute inset-0 rounded-2xl overflow-hidden"
+            className="absolute inset-0 rounded-2xl overflow-hidden border border-white/10"
             style={{
               backfaceVisibility: "hidden",
               WebkitBackfaceVisibility: "hidden",
               transform: "rotateY(0deg)",
+              background: "#07090e",
             }}
           >
+            {/* Ambient Background Gradient */}
             <div
               className="absolute inset-0"
               style={{
                 background:
-                  "linear-gradient(135deg, #020404 0%, #06171c 28%, #050506 52%, #190817 74%, #020404 100%)",
+                  "radial-gradient(circle at 80% 20%, rgba(69, 190, 214, 0.12) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(216, 88, 151, 0.12) 0%, transparent 40%)",
               }}
             />
 
-            <motion.div
-              className="absolute inset-0"
-              animate={{
-                backgroundPosition: isHovered
-                  ? ["0% 0%", "100% 100%", "0% 0%"]
-                  : ["0% 0%", "50% 50%", "0% 0%"],
-              }}
-              transition={{
-                duration: isHovered ? 4 : 8,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-              style={{
-                background: `
-                  radial-gradient(ellipse 80% 50% at 20% 30%, rgba(69,1,214,0.18) 0%, transparent 52%),
-                  radial-gradient(ellipse 60% 40% at 80% 70%, rgba(216,8,151,0.2) 0%, transparent 52%),
-                  radial-gradient(ellipse 100% 60% at 50% 50%, rgba(255,255,255,0.035) 0%, transparent 60%)
-                `,
-                backgroundSize: "200% 200%",
-              }}
-            />
-
-            <motion.div
-              className="absolute inset-0 opacity-60"
-              animate={{
-                background: isHovered
-                  ? [
-                      "linear-gradient(45deg, transparent 30%, rgba(69,190,214,0.2) 50%, transparent 70%)",
-                      "linear-gradient(45deg, transparent 40%, rgba(216,88,151,0.24) 55%, transparent 75%)",
-                      "linear-gradient(45deg, transparent 30%, rgba(69,190,214,0.2) 50%, transparent 70%)",
-                    ]
-                  : "linear-gradient(45deg, transparent 30%, rgba(69,190,214,0.12) 50%, transparent 70%)",
-              }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-            />
-            <motion.div
-              className="absolute inset-0"
-              animate={{ opacity: isHovered ? [0.3, 0.6, 0.3] : 0.3 }}
-              transition={isHovered ? { duration: 2, repeat: Infinity, ease: "easeInOut" } : { duration: 0 }}
-              style={{
-                background: `
-                  conic-gradient(from 0deg at 30% 30%, 
-                    transparent 0deg, 
-                    rgba(69,1,214,0.18) 60deg, 
-                    transparent 120deg,
-                    rgba(219,8,180,0.14) 180deg,
-                    transparent 240deg,
-                    rgba(69,1,214,0.14) 300deg,
-                    transparent 360deg
-                  )
-                `,
-              }}
-            />
-
-            {/* Shimmer sweep — unchanged, already only plays on repeat with a delay */}
-            <motion.div className="absolute inset-0 overflow-hidden rounded-2xl">
-              <motion.div
-                className="absolute h-full"
-                animate={{ x: ["-200%", "100%"] }}
-                transition={{
-                  duration: 5,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                  repeatDelay: 2,
-                }}
-                style={{
-                  background:
-                    "linear-gradient(90deg, transparent 0%, transparent 40%, rgba(69,190,214,0.16) 48%, rgba(216,88,151,0.12) 54%, transparent 62%, transparent 100%)",
-                  transform: "skewX(-25deg)",
-                  width: "300%",
-                }}
-              />
-            </motion.div>
-
-            <div
-              className="absolute rounded-2xl"
-              style={{
-                inset: "1px",
-                border: "1px solid rgba(69,190,214,0.25)",
-                boxShadow:
-                  "inset 0 1px 1px rgba(69,190,214,0.22), inset 0 -1px 1px rgba(216,88,151,0.16), 0 18px 46px rgba(216,88,151,0.12)",
-              }}
-            />
-
-            <div
-              className="relative h-full p-8 flex flex-col justify-between gap-5"
-              style={{ transform: "translateZ(30px)" }}
-            >
-              <div
-                className="grid items-center gap-6"
-                style={{ gridTemplateColumns: "112px minmax(0, 1fr)", minHeight: "150px" }}
-              >
-                <div className="relative">
-
-                  <motion.div
-                    className="absolute rounded-full"
-                    animate={{ opacity: isHovered ? [0.4, 0.8, 0.4] : 0.4 }}
-                    transition={isHovered ? { duration: 2, repeat: Infinity, ease: "easeInOut" } : { duration: 0 }}
-                    style={{
-                      background: "linear-gradient(135deg, #45bed6 0%, #d85897 55%, #45bed6 100%)",
-                      inset: "-3px",
-                      borderRadius: "9999px",
-                    }}
+            {/* FRONT CONTENT GRID */}
+            <div className="relative z-10 h-full flex items-center">
+              {/* Left rectangular image area */}
+              <div className="relative w-[200px] h-full overflow-hidden border-r border-white/10 bg-zinc-900 shrink-0">
+                {image ? (
+                  <img
+                    src={image}
+                    alt={name}
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full h-full object-cover object-top filter brightness-[0.92] contrast-[1.05]"
                   />
-
-                  <Avatar name={name} image={image} className="relative w-28 h-28" />
-                </div>
-                <div className="min-w-0">
-                  <div className="space-y-2 text-right">
-                    <h2
-                      className="text-xl sm:text-2xl font-light tracking-wide text-white leading-tight break-words"
-                      style={{ textShadow: "0 2px 12px rgba(69,190,214,0.24)" }}
-                    >
-                      {name}
-                    </h2>
-
-                    <p
-                      className="text-xs tracking-widest uppercase"
-                      style={{
-                        background: "linear-gradient(90deg, #45bed6 0%, #f0c4da 50%, #d85897 100%)",
-                        WebkitBackgroundClip: "text",
-                        WebkitTextFillColor: "transparent",
-                      }}
-                    >
-                      {role}
-                    </p>
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-zinc-600 font-mono text-xl">
+                    {name.split(" ").map((n) => n[0]).join("")}
                   </div>
-                </div>
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
               </div>
 
-              <div className="flex items-end justify-between">
-                <div className="flex items-end justify-evenly gap-x-2">
-                  <img
-                    src="/insta-transparent.webp"
-                    alt="Instagram"
-                    className="w-5 h-5 opacity-50 mb-1 hover:opacity-100 cursor-pointer"
-                    onClick={() => insta && window.open(insta, "_blank")}
-                  />
-                  <img
-                    src="/linkedin-transparent.webp"
-                    alt="LinkedIN"
-                    className="w-7 h-7 opacity-60 hover:opacity-100 cursor-pointer"
-                    onClick={() => linkedin && window.open(linkedin, "_blank")}
-                  />
-                </div>
-                <motion.div
-                  className="flex items-center justify-center"
-                  animate={{ opacity: isHovered ? 1 : 0.7 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <IEEEEMBSLogo className="h-12" style={{ width: "145px", borderRadius: "6px" }} />
-                </motion.div>
-              </div>
-            </div>
-
-            <motion.div
-              className="absolute left-1/2"
-              style={{ bottom: "12px", transform: "translateX(-50%)" }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: isHovered ? 0.5 : 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <span
-                className="uppercase"
-                style={{ color: "#45bed6", fontSize: "9px", fontFamily: "monospace", letterSpacing: "0.1em" }}
-              >
-                Click to flip
-              </span>
-            </motion.div>
-          </motion.div>
-
-          {/* BACK */}
-          <motion.div
-            className="absolute inset-0 rounded-2xl overflow-hidden"
-            style={{
-              backfaceVisibility: "hidden",
-              WebkitBackfaceVisibility: "hidden",
-              transform: "rotateY(180deg)",
-            }}
-          >
-            <div
-              className="absolute inset-0"
-              style={{
-                background:
-                  "linear-gradient(225deg, #06171c 0%, #120713 4%, #020404 62%, #0b1d22 100%)",
-              }}
-            />
-
-            <motion.div
-              className="absolute inset-0"
-              animate={isFlipped ? { backgroundPosition: ["0% 0%", "100% 100%", "0% 0%"] } : {}}
-              transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-              style={{
-                background: `
-                  radial-gradient(ellipse 60% 40% at 70% 40%, rgba(216,8,151,0.18) 0%, transparent 50%),
-                  radial-gradient(ellipse 80% 60% at 30% 60%, rgba(69,1,214,0.16) 0%, transparent 50%)
-                `,
-                backgroundSize: "200% 200%",
-              }}
-            />
-
-            <div
-              className="absolute rounded-2xl"
-              style={{
-                inset: "1px",
-                border: "1px solid rgba(216,8,151,0.28)",
-                boxShadow:
-                  "inset 0 1px 1px rgba(216,8,151,0.2), inset 0 -1px 1px rgba(69,1,214,0.16)",
-              }}
-            />
-
-            <div className="relative h-full p-8 flex flex-col justify-between">
-              <div className="flex items-center justify-between gap-4">
-                <IEEEEMBSLogo className="h-8 opacity-80" style={{ width: "96px", borderRadius: "4px" }} />
-                <span
-                  className="uppercase"
-                  style={{ color: "#d85897", fontSize: "11px", fontFamily: "monospace", letterSpacing: "0.22em" }}
-                >
-                  IEEE EMBS BOARD
-                </span>
-              </div>
-
-              <div className="space-y-4">
-                <div className="space-y-1">
-                  <h3 className="text-2xl font-light leading-tight text-white">{name}</h3>
-                  <p
-                    className="text-xs tracking-widest uppercase"
-                    style={{
-                      background: "linear-gradient(90deg, #45bed6 0%, #f0c4da 50%, #d85897 100%)",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                    }}
+              {/* Right text area */}
+              <div className="flex-1 h-full p-6 flex flex-col justify-between min-w-0">
+                <div className="space-y-1 mt-2">
+                  <h2
+                    className="text-xl sm:text-2xl font-sans font-semibold tracking-tight text-white leading-snug break-words"
+                    style={{ textShadow: "0 2px 10px rgba(0,0,0,0.5)" }}
                   >
+                    {name}
+                  </h2>
+                  <p className="text-xs font-sans font-medium tracking-wider uppercase text-purple-300/90">
                     {role}
                   </p>
                 </div>
 
-                <div className="space-y-2">
-                  <h3
-                    className="uppercase"
-                    style={{ color: "#45bed6", fontSize: "10px", fontFamily: "monospace", letterSpacing: "0.2em" }}
-                  >
-                    About
-                  </h3>
-                  <p
-                    className="text-xs leading-relaxed"
-                    style={{
-                      color: "#c9dce1",
-                      maxHeight: "92px",
-                      overflowY: "auto",
-                      paddingRight: "4px",
-                      whiteSpace: "pre-line",
-                    }}
-                  >
-                    {about}
-                  </p>
+                <div className="flex items-center justify-between pt-4 border-t border-white/10">
+                  <span className="text-[10px] font-sans tracking-widest text-zinc-500 uppercase">
+                    Click to Flip
+                  </span>
+                  <div className="flex items-center gap-3">
+                    {insta && (
+                      <img
+                        src="/insta-transparent.webp"
+                        alt="Instagram"
+                        className="w-4 h-4 opacity-60 hover:opacity-100 transition-opacity"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.open(insta, "_blank");
+                        }}
+                      />
+                    )}
+                    {linkedin && (
+                      <img
+                        src="/linkedin-transparent.webp"
+                        alt="LinkedIn"
+                        className="w-5 h-5 opacity-60 hover:opacity-100 transition-opacity"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.open(linkedin, "_blank");
+                        }}
+                      />
+                    )}
+                  </div>
                 </div>
               </div>
+            </div>
+          </motion.div>
 
-              <div className="flex items-center justify-between">
-                <span></span>
-                <span style={{ color: "#45bed6", fontSize: "9px", fontFamily: "monospace", letterSpacing: "0.05em" }}>
-                  2025-26
-                </span>
+          {/* BACK */}
+          <motion.div
+            className="absolute inset-0 rounded-2xl overflow-hidden border border-pink-500/20"
+            style={{
+              backfaceVisibility: "hidden",
+              WebkitBackfaceVisibility: "hidden",
+              transform: "rotateY(180deg)",
+              background: "#08070c",
+            }}
+          >
+            <div
+              className="absolute inset-0"
+              style={{
+                background:
+                  "radial-gradient(circle at 20% 80%, rgba(216, 88, 151, 0.15) 0%, transparent 50%)",
+              }}
+            />
+
+            <div className="relative h-full p-6 flex flex-col justify-between z-10">
+              <div>
+                <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-4">
+                  <span className="text-[10px] font-sans tracking-widest text-pink-400 uppercase">
+                    IEEE EMBS BOARD
+                  </span>
+                  <span className="text-[10px] font-sans text-zinc-500">2025-26</span>
+                </div>
+
+                <h3 className="text-lg font-semibold text-white leading-tight">{name}</h3>
+                <p className="text-xs font-sans text-neutral-400 uppercase mt-0.5 mb-3">{role}</p>
+
+                <p className="text-xs text-zinc-300 font-sans leading-relaxed max-h-[110px] overflow-y-auto pr-2">
+                  {about}
+                </p>
               </div>
-              <div
-                className="absolute left-1/2"
-                style={{ bottom: "12px", transform: "translateX(-50%)", opacity: 0.5 }}
-              >
-                <span
-                  className="uppercase"
-                  style={{ color: "#d85897", fontSize: "9px", fontFamily: "monospace", letterSpacing: "0.1em" }}
-                >
+
+              <div className="text-center pt-2 border-t border-white/5">
+                <span className="text-[9px] font-sans text-zinc-500 uppercase tracking-widest">
                   Click to flip back
                 </span>
               </div>
@@ -612,54 +395,46 @@ function LiquidMetalIDCard({
 
 export default function BoardGrid() {
   return (
-      <section className="relative bg-transparent py-16 px-8">
-        <div
-          className="fixed inset-0 opacity-20 pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(ellipse at 42% 36%, rgba(69, 190, 220, 0.12) 0%, transparent 48%), radial-gradient(ellipse at 68% 72%, rgba(216, 88, 151, 0.12) 0%, transparent 52%)",
-          }}
-        />
+    <section className="relative bg-transparent py-16 px-8">
+      <div
+        className="fixed inset-0 opacity-20 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse at 42% 36%, rgba(69, 190, 220, 0.12) 0%, transparent 48%), radial-gradient(ellipse at 68% 72%, rgba(216, 88, 151, 0.12) 0%, transparent 52%)",
+        }}
+      />
 
-        <div className="relative z-10 text-center mb-2">
-          <h1
-            className="text-6xl font-serif font-semibold tracking-wide text-white mb-2"
-            style={{ textShadow: "0 0 24px rgba(69,190,214,0.28)" }}
-          >
-            THE BOARD
-          </h1>
-          <p
-            className="text-sm uppercase"
-            style={{
-              letterSpacing: "0.3em",
-              background: "linear-gradient(90deg, #45bed6 0%, #f0c4da 45%, #d85897 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
-          >
-            2025-26
-          </p>
-        </div>
+      <div className="relative z-10 text-center mb-12">
+        <h1 className="text-5xl font-bold tracking-relaxed font-sans text-white mb-2">BOARD</h1>
+        <p className="text-xs font-sans tracking-[0.3em] text-pink-300 uppercase">2025-26</p>
+      </div>
 
-        <div
-          className="relative z-10 grid gap-12 mx-auto justify-items-center"
-          style={{
-            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 440px), 1fr))",
-            maxWidth: "960px",
-          }}
-        >
-          {boardMembers.map((member, index) => (
-            <LiquidMetalIDCard
+      <div
+        className="relative z-10 grid grid-cols-1 sm:grid-cols-2 gap-8 mx-auto justify-items-center"
+        style={{
+          maxWidth: "960px",
+        }}
+      >
+        {boardMembers.map((member) => {
+          const isFaculty = member.role === "Faculty Coordinator";
+
+          return (
+            <div
               key={member.name}
-              name={member.name}
-              role={member.role}
-              image={member.image}
-              about={member.about}
-              insta={member.insta}
-              linkedin={member.linkedin}
-            />
-          ))}
-        </div>
-      </section>
+              className={isFaculty ? "sm:col-span-2 sm:justify-self-center" : ""}
+            >
+              <LiquidMetalIDCard
+                name={member.name}
+                role={member.role}
+                image={member.image}
+                about={member.about}
+                insta={member.insta}
+                linkedin={member.linkedin}
+              />
+            </div>
+          );
+        })}
+      </div>
+    </section>
   );
 }

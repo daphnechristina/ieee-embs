@@ -1,16 +1,15 @@
-// src/components/blogs/BlogsStack.tsx
-"use client"
-//pink text-[#E6619A]
-//blue text-[#42A8C6]
-import { useState, useRef } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import Navbar from "@/components/ui/NavBar";
 
-interface Card {
-  id: number
-  contentType: number
+interface Blog {
+  id: string;
+  title: string;
+  author: string;
+  desc: string;
+  link: string;
+  image: string;
 }
 
- const blogs = [
+const blogs: Blog[] = [
   {
     id: "1.biomedical-exoskeleton",
     title: "Biomedical Exoskeleton",
@@ -197,204 +196,92 @@ interface Card {
   },
 ];
 
-const initialCards: Card[] = [
-  { id: 1, contentType: 1 },
-  { id: 2, contentType: 2 },
-  { id: 3, contentType: 3 },
-]
-
-const positionStyles = [
-  { scale: 1, y: 12 },
-  { scale: 0.95, y: -16 },
-  { scale: 0.9, y: -44 },
-]
-
-const exitAnimation = {
-  y: 340,
-  scale: 1,
-  zIndex: 10,
-}
-
-const enterAnimation = {
-  y: -16,
-  scale: 0.9,
-}
-
-function CardContent({ contentType }: { contentType: number }) {
-  const data = blogs[contentType - 1]
+export default function BlogsPage() {
+  // First 3 items (id 1, 2, 3) as Staff Picks
+  const staffPicks = blogs.slice(0, 3);
+  // Remaining items (id 4 to 23) in main feed
+  const mainFeed = blogs.slice(3);
 
   return (
-    <div className="p-6 bg-linear-to-br outline-purple-950 outline from-gray-950 to-gray-950 rounded-lg text-center">
-      <div className="flex flex-row h-[260px] w-full items-center justify-center rounded-lg">
-        <div className="flex h-auto w-auto items-center justify-center rounded-lg">
-          <img
-            src={data.image}
-            alt={data.title}
-            className="h-[220px] w-[220px] flex-shrink-0 rounded-3xl object-cover object-center"
-            loading="lazy"
-            decoding="async"
-          />
-        </div>
-        <div className="flex flex-row items-center justify-between px-3 pb-2">
-          <div className="flex min-w-0 flex-1 flex-col">
-            <div className="flex flex-col items-center justify-center gap-1">
-              <span className="font-bold text-xl font-sans font-stretch-condensed text-amber-50">
-                {data.title}
-              </span>
-              <span className="font-sans font-bold text-pink-300">by {data.author}</span>
-            </div>
-            <span className="mb-5 text-sm mt-5 font-sans text-muted-foreground">{data.desc}</span>
-            <br />
-            <div className="flex w-full items-end-safe justify-end">
-            <button
-              onClick={() => window.open(data.link, "_blank")}
-              rel="noopener noreferrer"
-              className="flex cursor-pointer w-min hover:transition-opacity hover:bg-blue-300 h-10 items-center rounded-full bg-blue-200 pl-4 pr-3 text-sm font-bold text-black"
-              >
-              Read
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="square"
-              >
-                <path d="M9.5 18L15.5 12L9.5 6" />
-              </svg>
-            </button>
-          </div>
-          </div>
-        </div>
-      </div>
-    </div>  
-  )
-}
-
-function AnimatedCard({
-  card,
-  index,
-  isAnimating,
-}: {
-  card: Card
-  index: number
-  isAnimating: boolean
-}) {
-  const { scale, y } = positionStyles[index] ?? positionStyles[2]
-  const zIndex = index === 0 && isAnimating ? 10 : 3 - index
-
-  const exitAnim = index === 0 ? exitAnimation : undefined
-  const initialAnim = index === 2 ? enterAnimation : undefined
-
-  return (
-    <motion.div
-      key={card.id}
-      initial={initialAnim}
-      animate={{ y, scale }}
-      exit={exitAnim}
-      transition={{
-        type: "spring",
-        duration: 1,
-        bounce: 0,
-      }}
-      style={{
-        zIndex,
-        left: "50%",
-        x: "-50%",
-        bottom: 0,
-      }}
-      className="absolute flex h-full w-full items-center justify-center overflow-hidden rounded-2xl"
-    >
-      <CardContent contentType={card.contentType} />
-    </motion.div>
-  )
-}
-
-export default function AnimatedCardStack() {
-  const [cards, setCards] = useState(initialCards)
-  const [isAnimating, setIsAnimating] = useState(false)
-
-  const idCounter = useRef(4)
-
-    const handleAnimate = () => {
-      setIsAnimating(true)
-
-      const nextContentType =
-    cards[2].contentType >= blogs.length
-      ? 1
-      : cards[2].contentType + 1
-      const nextCardId = idCounter.current
-      setCards([...cards.slice(1), { id: nextCardId, contentType: nextContentType }])
-      idCounter.current += 1
-      setIsAnimating(false)
-    }
-
-    const handleAnimateBack = () => {
-      if (isAnimating) return; // Prevent spam clicking
-      setIsAnimating(true);
-
-      // 1. Calculate the previous content type
-      const prevContentType = cards[0].contentType <= 1 
-        ? blogs.length 
-        : cards[0].contentType - 1;
-
-      // 2. Generate a unique ID
-      const nextCardId = idCounter.current;
-      idCounter.current += 1;
-
-      // 3. LOGIC FIX: Add to the START, remove from the END
-      setCards([
-        { id: nextCardId, contentType: prevContentType }, // New card at the top/start
-        ...cards.slice(0, cards.length - 1)                // Keep all but the last card
-      ]);
-
-      // 4. IMPORTANT: Wait for animation to finish before allowing next click
-      setTimeout(() => setIsAnimating(false), 100); 
-    };
-
-  return (
-    <div className="flex w-auto flex-col items-center justify-center pt-2">
-      <div className="relative z-10 text-center">
-          <h1
-            className="text-3xl font-semibold font-sans tracking-relaxed text-white mb-2"
-            style={{ textShadow: "0 0 24px rgba(69,190,214,0.28)" }}
-          >
+    <div className="min-h-screen bg-transparent text-zinc-200 font-sans">
+        <Navbar />
+      <div className="max-w-7xl mx-auto px-6 py-16">
+        {/* Header */}
+        <header className="border-b border-zinc-800/80 pb-8 mb-12">
+          <h1 className="text-5xl font-bold tracking-tight text-white mb-3 font-sans">
             Blogs
           </h1>
-          {/*<p
-            className="text-sm font-medium font-sans tracking-wide text-white/70"
-            style={{
-              letterSpacing: "0.3em",
-              background: "linear-gradient(90deg, #45bed6 0%, #f0c4da 45%, #d85897 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
-          >
-            Few of our insights
-          </p>*/}
-        </div>
-      <div className="relative h-95 mt-3 overflow-hidden sm:w-161">
-        <AnimatePresence initial={false}>
-          {cards.slice(0, 3).map((card, index) => (
-            <AnimatedCard key={card.id} card={card} index={index} isAnimating={isAnimating} />
-          ))}
-        </AnimatePresence>
-      </div>
+          <p className="text-base text-zinc-400 font-sans">
+            Insights and updates from the IEEE EMBS team.
+          </p>
+        </header>
 
-      <div className="relative z-10 bg-transparent gap-x-4 flex w-full items-center justify-center py-4">
-        <button
-          onClick={handleAnimateBack}
-          className="flex h-9 cursor-pointer items-center justify-center gap-1 overflow-hidden rounded-lg bg-black px-3 font-bold  text-secondary-foreground transition-all hover:bg-cyan-900 active:scale-[0.98]"
-        >
-          Back
-        </button>
-        <button
-          onClick={handleAnimate}
-          className="flex h-9 cursor-pointer items-center justify-center gap-1 overflow-hidden rounded-lg bg-black px-3 font-bold  text-secondary-foreground transition-all hover:bg-pink-900 active:scale-[0.98]"
-        >
-          Next
-        </button>
+        {/* Layout Grid - Interchanged Sidebar and Main Feed */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+          {/* Staff Picks Column (Left Side now) */}
+          <aside className="lg:col-span-4 order-2 lg:order-1">
+            <div className="sticky top-8 space-y-6">
+              <h3 className="text-sm font-semibold tracking-wider text-zinc-400 uppercase font-sans">
+                Staff Picks
+              </h3>
+
+              <div className="space-y-6">
+                {staffPicks.map((pick) => (
+                  <a
+                    key={pick.id}
+                    href={pick.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group block font-sans"
+                  >
+                    <div className="text-sm text-pink-300 mb-1 font-sans">
+                      {pick.author}
+                    </div>
+                    <h4 className="text-base font-semibold text-zinc-200 group-hover:text-blue-300 transition-colors leading-snug font-sans">
+                      {pick.title}
+                    </h4>
+                  </a>
+                ))}
+              </div>
+            </div>
+          </aside>
+
+          {/* Main Feed Column (Right Side now, showing items 4 through 23) */}
+          <main className="lg:col-span-8 divide-y divide-zinc-800/60 order-1 lg:order-2">
+            {mainFeed.map((blog) => (
+              <article key={blog.id} className="py-8 first:pt-0">
+                <a
+                  href={blog.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex flex-col-reverse sm:flex-row justify-between gap-8 font-sans"
+                >
+                  <div className="flex-1">
+                    <div className="text-sm font-medium text-pink-300 mb-2 font-sans">
+                      {blog.author}
+                    </div>
+                    <h2 className="text-2xl font-bold text-zinc-100 group-hover:text-blue-300 transition-colors leading-snug mb-3 font-sans">
+                      {blog.title}
+                    </h2>
+                    <p className="text-base text-zinc-400 line-clamp-3 leading-relaxed font-sans">
+                      {blog.desc}
+                    </p>
+                  </div>
+
+                  {/* Expanded Image Container */}
+                  <div className="w-full sm:w-52 h-36 bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden shrink-0">
+                    <img
+                      src={blog.image}
+                      alt={blog.title}
+                      loading="lazy"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </a>
+              </article>
+            ))}
+          </main>
+        </div>
       </div>
     </div>
   );

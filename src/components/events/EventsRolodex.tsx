@@ -1,9 +1,7 @@
 "use client"
 
-import { motion, useMotionValue } from "framer-motion"
+import { motion, useMotionValue, useTransform } from "framer-motion"
 import { useEffect, useRef, useState } from "react"
-import { LazyMotion, domAnimation, useTransform } from "framer-motion"
-
 
 const events = [
   {
@@ -13,7 +11,6 @@ const events = [
     image: "/events/silenttoxin.jpeg",
     description:
       "A mystery-driven biomedical challenge exploring hidden toxins, diagnosis, and critical thinking through immersive problem-solving.",
-
   },
   {
     date: "Feb",
@@ -70,9 +67,7 @@ const events = [
     image: "/events/bioconnect.jpg.jpeg",
     description:
       "A networking and collaboration experience bringing together curious minds passionate about biomedical engineering and healthcare innovation.",
-    
   },
-  
   {
     date: "Sep 29",
     year: "2024",
@@ -80,18 +75,15 @@ const events = [
     image: "/events/laboflunacy.jpeg",
     description:
       "A biomedical escape room where participants solved medical mysteries and experimental challenges hidden within a mad scientist’s lab.",
-
   },
-
   {
     date: "Sep 21",
     year: "2024",
     title: "Circuit of Lies",
     image: "/events/circuitoflies.jpeg",
     description:
-    "Circuit of Lies was a hands-on workshop where participants built a lie detector from scratch and tested it on themselves and friends."
+      "Circuit of Lies was a hands-on workshop where participants built a lie detector from scratch and tested it on themselves and friends.",
   },
-  
   {
     date: "Aug 21",
     year: "2024",
@@ -120,65 +112,46 @@ const events = [
     date: "Mar 19",
     year: "2024",
     title: "CrisisX 2.0",
-    image : "/events/crisisx2024.jpeg",
+    image: "/events/crisisx2024.jpeg",
     description:
-    "A medical emergency simulation event where students see the daily lives of healthcare professionals motivating them to innovate making emergency healthcare more efficient."
+      "A medical emergency simulation event where students see the daily lives of healthcare professionals motivating them to innovate making emergency healthcare more efficient.",
   },
   {
     date: "Jun 7",
     year: "2023",
     title: "CrisisX",
     image: "/events/crisisx2023.jpeg",
-    description: 
-    "An immersive emergency-response challenge where participants tackled critical healthcare scenarios with technology and developed decision-making skills under pressure."
-
+    description:
+      "An immersive emergency-response challenge where participants tackled critical healthcare scenarios with technology and developed decision-making skills under pressure.",
   },
 ]
 
 export default function EventsRolodex() {
   const [active, setActive] = useState(0)
   const containerRef = useRef<HTMLDivElement>(null)
-  const isAnimating = useRef(false)
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const scrollAccumulator = useRef(0)
 
   const mouseX = useMotionValue(0)
   const mouseY = useMotionValue(0)
 
   const rotateYActive = useTransform(mouseX, (v) => v * 0.3)
   const rotateXActive = useTransform(mouseY, (v) => -2 - v)
- 
-// Replace your existing wheel useEffect with this:
-
-// This ref stores leftover scroll that hasn't triggered an event change yet.
-// It's a ref (not state) because changing it shouldn't cause a re-render.
-  const scrollAccumulator = useRef(0)
 
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
       if (!containerRef.current?.contains(e.target as Node)) return
       e.preventDefault()
 
-      // Add this scroll's delta to the accumulator.
-      // deltaY is negative when scrolling up, positive when scrolling down.
       scrollAccumulator.current += e.deltaY
-
-      // The threshold is how much scrolling = one event step.
-      // 150 feels natural — tune this up (more effort) or down (more sensitive).
-      const THRESHOLD = 150
-
-      // How many events should we jump? Could be 0, 1, 2, etc.
-      // Math.trunc cuts off the decimal — we only want whole event steps.
+      const THRESHOLD = 120
       const steps = Math.trunc(scrollAccumulator.current / THRESHOLD)
 
-      if (steps === 0) return // haven't accumulated enough yet, do nothing
+      if (steps === 0) return
 
-      // Consume exactly the scroll that produced those steps.
-      // The remainder stays in the accumulator for the next event.
       scrollAccumulator.current -= steps * THRESHOLD
 
       setActive((prev) => {
         const next = prev + steps
-        // Clamp to valid range so it can't go below 0 or above the last event
         return Math.max(0, Math.min(events.length - 1, next))
       })
     }
@@ -188,7 +161,7 @@ export default function EventsRolodex() {
       window.removeEventListener("wheel", handleWheel)
     }
   }, [])
- 
+
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       mouseX.set((e.clientX / window.innerWidth - 0.5) * 3)
@@ -197,111 +170,122 @@ export default function EventsRolodex() {
     window.addEventListener("mousemove", handleMouseMove)
     return () => window.removeEventListener("mousemove", handleMouseMove)
   }, [mouseX, mouseY])
- 
-  return (
-      <section
-        ref={containerRef}
-        className="relative w-full h-full mt-2 flex items-center justify-center overflow-hidden"
-      >
-        <div className="absolute right-12 top-1/2 -translate-y-1/2 z-30">
-        
-          <div className="flex flex-col gap-0.5 items-end">
-            {events.map((event, i) => {
-              const isActive = i === active
-              return (
-                <motion.button
-                  key={`${event.title}-${event.year}`}
-                  onClick={() => setActive(i)}
-                  whileHover={{ x: -6 }}
-                  animate={{ opacity: isActive ? 1 : 0.35, x: isActive ? -10 : 0 }}
-                  transition={{ duration: 0.5 }}
-                  className="flex items-center gap-4"
-                >
-                  <div
-                    className={`text-right transition-all duration-500 ${
-                      isActive ? "text-pink-300" : "text-zinc-600"
-                    }`}
-                  >
-                    <div className="text-[13px] font-semibold font-sans uppercase">{event.date}</div>
-                    <div className="text-[10px] font-sans font-semibold">{event.year}</div>
-                  </div>
- 
-                  <div
-                    className={`rounded-full transition-all duration-500 ${
-                      isActive ? "w-10 h-[2px] bg-white" : "w-6 h-[1px] bg-zinc-700"
-                    }`}
-                  />
-                </motion.button>
-              )
-            })}
-          </div>
-        </div>
- 
-        {/* CARD STACK */}
-        <div className="relative w-[550px] h-[550px]" style={{ perspective: "2500px" }}>
-          {events.map((event, i) => {
-            const offset = i - active
-            const uniqueKey = `${event.title}-${event.year}`
 
-            if (Math.abs(offset) > 4) return null
- 
+  return (
+    <section
+      ref={containerRef}
+      className="relative w-full py-8 flex flex-col items-center justify-center overflow-hidden"
+    >
+      {/* HORIZONTAL TIMELINE TOP NAV */}
+      <div className="w-full max-w-5xl mb-8 overflow-x-auto no-scrollbar py-2 px-4 z-30">
+        <div className="flex items-center justify-between min-w-max gap-6 mx-auto">
+          {events.map((event, i) => {
+            const isActive = i === active
             return (
-              <motion.div
-                key={uniqueKey}
+              <motion.button
+                key={`${event.title}-${event.year}`}
+                onClick={() => setActive(i)}
+                whileHover={{ y: -3 }}
                 animate={{
-                  y: offset * 35,
-                  scale: 1 - Math.abs(offset) * 0.05,
-                  rotateY: offset === 0 ? rotateYActive.get() : 0,
-                  rotateX: offset === 0 ? rotateXActive.get() : -2,
-                  z: -Math.abs(offset) * 180,
-                  opacity: 1,
+                  opacity: isActive ? 1 : 0.4,
+                  scale: isActive ? 1.05 : 1,
                 }}
-                transition={{
-                  y: { duration: 0.9, ease: [0.22, 1, 0.36, 1] },
-                  scale: { duration: 0.9 },
-                }}
-                className="absolute inset-0 rounded-[38px] overflow-hidden border border-pink-400/20 bg-zinc-950/90 backdrop-blur-md shadow-xl"
-                style={{
-                  zIndex: 100 - Math.abs(offset),
-                  transformStyle: "preserve-3d",
-                  willChange: "transform",
-                }}
+                transition={{ duration: 0.3 }}
+                className="flex flex-col items-center gap-1.5 focus:outline-none"
               >
-                <div className="relative z-10 flex flex-col h-full p-8 overflow-hidden">
-                  <div className="flex-1 overflow-y-auto pr-2"> 
-                    <div>
-                      <img
-                        src={event.image}
-                        alt={event.title}
-                        loading="lazy"
-                        decoding="async"
-                        className="w-full rounded-2xl mb-8 object-cover max-h-[260px]"
-                      />
- 
-                      <h2 className="text-white font-sans text-4xl font-black leading-[1.05]">
-                        {event.title}
-                      </h2>
- 
-                      <p className="mt-3 text-zinc-300 leading-[1.7] text-[15px] max-w-[95%]">
-                        {event.description}
-                      </p>
-                    </div>
+                <div
+                  className={`text-center transition-colors duration-300 ${
+                    isActive ? "text-pink-200" : "text-zinc-500"
+                  }`}
+                >
+                  <div className="text-[12px] font-semibold uppercase tracking-wider">
+                    {event.date}
                   </div>
- 
-                  <div className="mt-auto pt-5">
-                    <div className="w-full h-px bg-cyan-400/20 mb-4" />
-                    <div className="flex items-center justify-between">
-                      <p className="text-cyan-200 text-lg">
-                        {event.date}, {event.year}
-                      </p>
-                      <p className="text-zinc-500 text-sm">Scroll to navigate</p>
-                    </div>
-                  </div>
+                  <div className="text-[10px] opacity-75">{event.year}</div>
                 </div>
-              </motion.div>
+
+                <div
+                  className={`rounded-full transition-all duration-300 ${
+                    isActive
+                      ? "w-8 h-[3px] bg-pink-300 shadow-[0_0_8px_rgba(34,211,238,0.8)]"
+                      : "w-2 h-[2px] bg-zinc-700"
+                  }`}
+                />
+              </motion.button>
             )
           })}
         </div>
-      </section>
+      </div>
+
+      {/* LANDSCAPE CARD STACK */}
+      <div
+        className="relative w-full max-w-screen h-[420px] sm:h-[450px]"
+        style={{ perspective: "2500px" }}
+      >
+        {events.map((event, i) => {
+          const offset = i - active
+          const uniqueKey = `${event.title}-${event.year}`
+
+          if (Math.abs(offset) > 3) return null
+
+          return (
+            <motion.div
+              key={uniqueKey}
+              animate={{
+                x: offset * 45,
+                scale: 1 - Math.abs(offset) * 0.06,
+                rotateY: offset === 0 ? rotateYActive.get() : offset * 2,
+                rotateX: offset === 0 ? rotateXActive.get() : -2,
+                z: -Math.abs(offset) * 150,
+                opacity: 1 - Math.abs(offset) * 0.25,
+              }}
+              transition={{
+                x: { duration: 0.7, ease: [0.22, 1, 0.36, 1] },
+                scale: { duration: 0.7 },
+              }}
+              className="absolute inset-0 rounded-3xl overflow-hidden border border-pink-400/20 bg-zinc-950/90 backdrop-blur-md shadow-2xl"
+              style={{
+                zIndex: 100 - Math.abs(offset),
+                transformStyle: "preserve-3d",
+                willChange: "transform",
+              }}
+            >
+              <div className="relative z-10 grid grid-cols-1 md:grid-cols-12 h-full p-6 md:p-8 gap-6 items-center">
+                {/* Left Side: Image */}
+                <div className="md:col-span-6 h-48 w-full md:h-full relative  rounded-2xl overflow-hidden border border-white/10 bg-black">
+                  <img
+                    src={event.image}
+                    alt={event.title}
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+
+                {/* Right Side: Details */}
+                <div className="md:col-span-6 flex flex-col justify-between h-full py-2">
+                  <div>
+                    <h2 className="text-white font-sans text-2xl md:text-3xl font-bold leading-tight mt-1 mb-3">
+                      {event.title}
+                    </h2>
+
+                    <p className="text-zinc-300 font-sans leading-relaxed text-sm md:text-base line-clamp-4">
+                      {event.description}
+                    </p>
+                  </div>
+
+                  <div className="pt-4 border-t border-cyan-400/20 flex items-center justify-between mt-auto">
+                    <p className="text-pink-300 font-sans font-semibold text-sm md:text-base">
+                      {event.date}, {event.year}
+                    </p>
+                    <span className="text-zinc-500 text-xs">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )
+        })}
+      </div>
+    </section>
   )
 }

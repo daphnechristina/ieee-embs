@@ -18,7 +18,7 @@ export default function AboutSection() {
       <div className="flex flex-col items-center justify-center px-6 text-center mx-auto">
         <div className="relative z-10 text-center mb-2">
           <h1
-            className="text-6xl font-semibold font-serif tracking-wide text-white mb-2"
+            className="text-5xl font-bold font-sans tracking-relaxed text-white mb-2"
             style={{ textShadow: "0 0 24px rgba(69,190,214,0.28)" }}
           >
             ABOUT US
@@ -38,7 +38,7 @@ export default function AboutSection() {
 
 
       <motion.div
-        className="max-w-4xl mt-6 text-center"
+        className="max-w-4xl mt-6 font-sans text-center"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1.2 }}
@@ -64,13 +64,13 @@ export default function AboutSection() {
       </p>
 
 
-      <h2 className="text-4xl font-semibold text-white mt-10 mb-2">
+      <h2 className="text-3xl font-sans font-semibold text-white mt-10 mb-2">
         Our Pillars
       </h2>
 
       <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl">
         <div className="rounded-xl border border-white/10 bg-white/[0.04] p-5 transition-all duration-300 hover:bg-white/[0.07] hover:scale-[1.02]">
-          <h3 className="text-blue-400 font-semibold text-xl">
+          <h3 className="text-blue-400 font-sans font-semibold text-xl">
             Innovation
           </h3>
           <p className="text-white/70 leading-relaxed mt-2">
@@ -82,27 +82,27 @@ export default function AboutSection() {
           <h3 className="text-purple-400 font-semibold text-xl">
             Collaboration
           </h3>
-          <p className="text-white/70 leading-relaxed mt-2">
+          <p className="text-white/70 font-sans leading-relaxed mt-2">
             Bridging engineering, medicine, and biological sciences.
           </p>
         </div>
 
-        <div className="rounded-xl border border-white/10 bg-white/[0.04] p-5 transition-all duration-300 hover:bg-white/[0.07] hover:scale-[1.02]">
+        <div className="rounded-xl border font-sans border-white/10 bg-white/[0.04] p-5 transition-all duration-300 hover:bg-white/[0.07] hover:scale-[1.02]">
           <h3 className="text-pink-400 font-semibold text-xl">
             Impact
           </h3>
-          <p className="text-white/70 leading-relaxed mt-2">
+          <p className="text-white/70 font-sansleading-relaxed mt-2">
             Creating solutions that improve healthcare worldwide.
           </p>
         </div>
       </div>
 
-      <div className="text-center items-center justify-center mt-10 mb-2">
-        <h2 className="text-4xl font-semibold text-white">
+      <div className="text-center items-center font-sans justify-center mt-10 mb-2">
+        <h2 className="text-3xl font-semibold text-white">
           Our Departments
         </h2>
 
-        <p className="text-white/70 leading-relaxed mt-2">
+        <p className="text-white/70 font-sans leading-relaxed mt-2">
           Specialized teams working together to drive innovation and impact.
         </p>
       </div>
@@ -132,14 +132,14 @@ export default function AboutSection() {
                 <Palette className="h-7 w-7 text-cyan-300" />
               </div>
 
-              <h3 className="min-h-[56px] flex items-center text-lg leading-snug font-semibold text-cyan-200">
+              <h3 className="min-h-[56px] font-sans flex items-center text-lg leading-snug font-semibold text-cyan-200">
                 Design
               </h3>
 
             </div>
 
             {/* Description */}
-            <p className="relative z-10 mt-3 leading-relaxed text-white/65">
+            <p className="relative z-10 mt-3 font-sans leading-relaxed text-white/65">
               Creative media, branding, posters, and visual storytelling.
             </p>
 
@@ -161,17 +161,17 @@ export default function AboutSection() {
           <div className="absolute top-0 left-[-100%] h-[2px] w-full bg-gradient-to-r from-transparent via-purple-400 to-transparent transition-all duration-700 group-hover:left-full" />
             <div className="relative z-10 flex items-center gap-4 mb-5">
 
-  <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-purple-400/20 transition-all duration-300 group-hover:scale-110">
-    <FlaskConical className="h-7 w-7 text-purple-300" />
-  </div>
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-purple-400/20 transition-all duration-300 group-hover:scale-110">
+              <FlaskConical className="h-7 w-7 text-purple-300" />
+            </div>
 
-  <h3 className="min-h-[56px] flex items-center text-lg leading-snug font-semibold text-purple-200">
-  Research &  Development
-</h3>
+            <h3 className="min-h-[56px] flex items-center text-lg leading-snug font-sans font-semibold text-purple-200">
+            Research &  Development
+          </h3>
 
           </div>
 
-          <p className="relative z-10 mt-3 leading-relaxed text-white/65">
+          <p className="relative z-10 mt-3 font-sans leading-relaxed text-white/65">
             Biomedical research initiatives, discussions, and technical projects.
           </p>
 
@@ -198,12 +198,12 @@ export default function AboutSection() {
                 <PenTool className="h-7 w-7 text-pink-300" />
               </div>
 
-              <h3 className="min-h-[56px] flex items-center text-lg leading-snug font-semibold text-pink-200">
+              <h3 className="min-h-[56px] font-sans flex items-center text-lg leading-snug font-semibold text-pink-200">
                 Editorial
               </h3>
 
             </div>
-            <p className="relative z-10 mt-3 leading-relaxed text-white/65">
+            <p className="relative z-10 mt-3 font-sans leading-relaxed text-white/65">
               Blogs, content writing, documentation, and digital publications.
             </p>
 
@@ -233,13 +233,13 @@ export default function AboutSection() {
               <Wallet className="h-7 w-7 text-emerald-300" />
             </div>
 
-            <h3 className="min-h-[56px] flex items-center text-lg leading-snug font-semibold text-emerald-200">
+            <h3 className="min-h-[56px] font-sans flex items-center text-lg leading-snug font-semibold text-emerald-200">
               Finance
             </h3>
 
           </div>
 
-          <p className="relative z-10 mt-3 leading-relaxed text-white/65">
+          <p className="relative z-10 mt-3 font-sans leading-relaxed text-white/65">
             Budget planning, sponsorship management, and financial operations.
           </p>
           </motion.div>
@@ -265,13 +265,13 @@ export default function AboutSection() {
                 <Megaphone className="h-7 w-7 text-violet-200" />
               </div>
 
-              <h3 className="min-h-[56px] flex items-center text-lg leading-snug font-semibold text-violet-100">
+              <h3 className="min-h-[56px] font-sans flex items-center text-lg leading-snug font-semibold text-violet-100">
                 PR & Outreach
               </h3>
 
             </div>
 
-            <p className="relative z-10 mt-3 leading-relaxed text-white/65">
+            <p className="relative z-10 mt-3 font-sans leading-relaxed text-white/65">
               Industry connections, collaborations, networking, and publicity.
             </p>
 
